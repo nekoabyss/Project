@@ -1,0 +1,33 @@
+package co.project.client.data.model
+
+import android.os.Parcel
+import android.os.Parcelable
+
+class Response(val id: String, val ssid: String, val rssi: Int, val lat: String, val long: String) : Parcelable {
+    constructor(client: Client, ssid: String, rssi: Int, lat: String, long: String) : this(client.id, ssid, rssi, lat, long)
+    constructor(source: Parcel) : this(
+            source.readString(),
+            source.readString(),
+            source.readInt(),
+            source.readString(),
+            source.readString()
+    )
+
+    override fun describeContents() = 0
+
+    override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
+        writeString(id)
+        writeString(ssid)
+        writeInt(rssi)
+        writeString(lat)
+        writeString(long)
+    }
+
+    companion object {
+        @JvmField
+        val CREATOR: Parcelable.Creator<Response> = object : Parcelable.Creator<Response> {
+            override fun createFromParcel(source: Parcel): Response = Response(source)
+            override fun newArray(size: Int): Array<Response?> = arrayOfNulls(size)
+        }
+    }
+}
