@@ -28,11 +28,14 @@ class ApiModule {
         return OkHttpClient()
     }
 
+    // SERVER IP
+
     @Provides
     @Singleton
     fun provideServerService(okHttpClient: OkHttpClient, gson: Gson): ServerService {
         return Retrofit.Builder()
                 .client(okHttpClient)
+//                .baseUrl("http://172.20.10.5:4444/") //172.20.10.5 , 4444  http(s)://[ip]:[port]/
                 .baseUrl("https://wifi-locator-mock.herokuapp.com/") //172.20.10.2 , 8080
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

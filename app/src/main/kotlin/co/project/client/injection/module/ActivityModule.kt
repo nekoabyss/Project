@@ -6,6 +6,10 @@ import dagger.Module
 import dagger.Provides
 import co.project.client.injection.ActivityContext
 import co.project.client.injection.PerActivity
+import co.project.client.ui.compass.CompassMvp
+import co.project.client.ui.compass.CompassPresenter
+import co.project.client.ui.main.MainMvp
+import co.project.client.ui.main.MainPresenter
 
 @Module
 class ActivityModule(private val activity: Activity) {
@@ -22,4 +26,19 @@ class ActivityModule(private val activity: Activity) {
     internal fun providesContext(): Context {
         return activity
     }
+
+    @Provides
+    @PerActivity
+    @ActivityContext
+    fun providesMainPresenter(presenter: MainPresenter<MainMvp.View>): MainMvp.Presenter<MainMvp.View> {
+        return presenter
+    }
+
+    @Provides
+    @PerActivity
+    @ActivityContext
+    fun providesCompassPresenter(presenter: CompassPresenter<CompassMvp.View>): CompassMvp.Presenter<CompassMvp.View> {
+        return presenter
+    }
+
 }

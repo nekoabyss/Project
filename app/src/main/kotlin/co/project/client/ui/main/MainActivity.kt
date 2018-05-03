@@ -1,5 +1,6 @@
 package co.project.client.ui.main
 
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.support.v7.widget.AppCompatButton
@@ -12,10 +13,13 @@ import co.project.client.data.SyncService
 import co.project.client.data.local.LocationHelper
 import co.project.client.data.model.Client
 import co.project.client.ui.base.BaseActivity
+import co.project.client.ui.compass.CompassActivity
 import timber.log.Timber
 import javax.inject.Inject
 
+
 class MainActivity : BaseActivity(), MainMvp.View {
+
     companion object {
         val EXTRA_TRIGGER_SYNC_FLAG =
                 "uk.co.ribot.androidboilerplate.ui.main.MainActivity.EXTRA_TRIGGER_SYNC_FLAG"
@@ -28,6 +32,9 @@ class MainActivity : BaseActivity(), MainMvp.View {
     @BindView(R.id.connection_text) lateinit var connectionTxt: AppCompatTextView
     @BindView(R.id.lat_text) lateinit var latText: AppCompatTextView
     @BindView(R.id.long_text) lateinit var longText: AppCompatTextView
+    @BindView(R.id.distance_text) lateinit var locationText: AppCompatTextView
+
+    var client: Client? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,18 +73,36 @@ class MainActivity : BaseActivity(), MainMvp.View {
             LocationHelper.instance.getLocation(this)?.let {
                 latText.text = "Latitude: ${it.latitude}"
                 longText.text = "Longitude: ${it.longitude}"
+                val temp = Location(android.location.LocationManager.GPS_PROVIDER)
+                temp.latitude = 13.794489
+                temp.longitude = 100.323559
+                //bearingText.text = "Bearing: ${it.bearingTo(temp)}"
+                locationText.text = "Distance: ${it.distanceTo(temp)} meters"
+                //desLatText.text = "Destination Lat: ${temp.latitude}"
+                //desLongText.text = "Destination Long: ${temp.longitude}"
+
             }
+        }
+    }
+
+    @OnClick(R.id.compass_page)
+    fun onCompassPage(){
+        this.client?.let {
+            val intent = Intent(this, CompassActivity::class.java)
+            intent.putExtra("client", this.client)
+            startActivity(intent)
         }
     }
 
     override fun onConnected(client: Client) {
         connectionTxt.text = "ID: ${client.id}"
-
+        this.client = client
     }
 
     override fun onServerConnectionResetted() {
-        connectionTxt.text = "Mia is kak and fat"
+        connectionTxt.text = "Connection Reset แล้วค่ะอีดอกไก่"
+        this.client = null
     }
-
+// bssid, lat, long, 10 rssi to server
 
 }
