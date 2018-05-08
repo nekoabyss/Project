@@ -33,7 +33,7 @@ constructor(private val dataManager : DataManager) : BasePresenter<V>(), Compass
                         Response("", "", 0, "", "")
                     }
                     .subscribe { response ->
-                        Toast.makeText(view.getContext(), "OK", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(view.getContext(), "SENT", Toast.LENGTH_SHORT).show()
                         view.hideLoading()
                     }
         }
