@@ -14,7 +14,6 @@ import co.project.client.data.local.LocationHelper
 import co.project.client.data.model.Client
 import co.project.client.ui.base.BaseActivity
 import co.project.client.ui.compass.CompassActivity
-import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -74,8 +73,8 @@ class MainActivity : BaseActivity(), MainMvp.View {
                 latText.text = "Latitude: ${it.latitude}"
                 longText.text = "Longitude: ${it.longitude}"
                 val temp = Location(android.location.LocationManager.GPS_PROVIDER)
-                temp.latitude = 13.794489
-                temp.longitude = 100.323559
+                temp.latitude = 13.844053
+                temp.longitude = 100.448537
                 //bearingText.text = "Bearing: ${it.bearingTo(temp)}"
                 locationText.text = "Distance: ${it.distanceTo(temp)} meters"
                 //desLatText.text = "Destination Lat: ${temp.latitude}"

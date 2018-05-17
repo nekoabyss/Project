@@ -35,6 +35,7 @@ constructor(private val dataManager : DataManager) : BasePresenter<V>(), Compass
                     .subscribe { response ->
                         Toast.makeText(view.getContext(), "SENT", Toast.LENGTH_SHORT).show()
                         view.hideLoading()
+                        view.onReceiveDestination(response.lat.toDouble(), response.long.toDouble())
                     }
         }
     }
@@ -73,7 +74,7 @@ constructor(private val dataManager : DataManager) : BasePresenter<V>(), Compass
             currentLocation?.let {
                 azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat() // orientation
                 azimuth = (azimuth + azimuthFix + 360f) % 360
-                azimuth -= getBearing(it.latitude, it.longitude, 13.800909, 100.254322).toFloat()
+                azimuth -= getBearing(it.latitude, it.longitude, 13.844053, 100.448537).toFloat()
                 view.adjustArrow(azimuth)
             }
         }

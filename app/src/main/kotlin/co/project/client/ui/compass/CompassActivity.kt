@@ -71,15 +71,15 @@ class CompassActivity : BaseActivity(), CompassMvp.View {
 
                 latText.text = "Latitude: ${it.latitude}"
                 longText.text = "Longitude: ${it.longitude}"
-                val temp = Location(LocationManager.GPS_PROVIDER)
-                temp.latitude = 13.794489
-                temp.longitude = 100.323559
-                //bearingText.text = "Bearing: ${it.bearingTo(temp)}"
-                locationText.text = "Distance: ${it.distanceTo(temp)} meters"
-                desLatText.text = "Destination Lat: ${temp.latitude}"
-                desLongText.text = "Destination Long: ${temp.longitude}"
             }
         }
+    }
+
+    override fun onReceiveDestination(lat: Double, long: Double) {
+        //bearingText.text = "Bearing: ${it.bearingTo(temp)}"
+//        locationText.text = "Distance: ${it.distanceTo(temp)} meters"
+        desLatText.text = "Destination Lat: $lat"
+        desLongText.text = "Destination Long: $long"
     }
 
     override fun adjustArrow(azimuth: Float) {

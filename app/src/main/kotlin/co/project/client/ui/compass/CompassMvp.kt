@@ -8,6 +8,7 @@ interface CompassMvp {
     interface View: BaseMvp.View {
         fun adjustArrow(azimuth: Float)
         fun onGetLocationClicked()
+        fun onReceiveDestination(lat: Double, long: Double)
     }
     interface Presenter<in V: BaseMvp.View>: BaseMvp.Presenter<V>, SensorEventListener {
         var currentLocation: Location?

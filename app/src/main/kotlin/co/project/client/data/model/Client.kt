@@ -3,13 +3,15 @@ package co.project.client.data.model
 import android.os.Parcel
 import android.os.Parcelable
 
-class Client(val id: String) : Parcelable {
-    constructor(source: Parcel) : this(source.readString())
+class Client(val id: String, val desLat: Double, val desLon: Double) : Parcelable {
+    constructor(source: Parcel) : this(source.readString(), source.readDouble(), source.readDouble())
 
     override fun describeContents() = 0
 
     override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
         writeString(id)
+        writeDouble(desLat)
+        writeDouble(desLon)
     }
 
     companion object {
