@@ -3,12 +3,13 @@ package co.project.client.data.model
 import android.os.Parcel
 import android.os.Parcelable
 
-class Response(val id: String, val ssid: String, val rssi: Int, val lat: String, val long: String) : Parcelable {
-    constructor(client: Client, ssid: String, rssi: Int, lat: String, long: String) : this(client.id, ssid, rssi, lat, long)
+class Response(val id: String?, val ssid: String?, val rssi: Int?, val lat: String?, val long: String?) : Parcelable {
+    constructor(client: Client, ssid: String?, rssi: Int?, lat: String?, long: String?) : this(client.id, ssid, rssi, lat, long)
+
     constructor(source: Parcel) : this(
             source.readString(),
             source.readString(),
-            source.readInt(),
+            source.readValue(Int::class.java.classLoader) as Int?,
             source.readString(),
             source.readString()
     )
@@ -18,7 +19,7 @@ class Response(val id: String, val ssid: String, val rssi: Int, val lat: String,
     override fun writeToParcel(dest: Parcel, flags: Int) = with(dest) {
         writeString(id)
         writeString(ssid)
-        writeInt(rssi)
+        writeValue(rssi)
         writeString(lat)
         writeString(long)
     }

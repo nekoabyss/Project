@@ -60,6 +60,13 @@
         android:text="to compassActivity"
         android:textColor="@android:color/black" />
 
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/rssi_page"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20px"
+        android:text="to rssi Activity"
+        android:textColor="@android:color/black" />
 
 
 </android.support.v7.widget.LinearLayoutCompat>

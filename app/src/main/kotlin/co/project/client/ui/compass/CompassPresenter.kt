@@ -23,20 +23,28 @@ constructor(private val dataManager : DataManager) : BasePresenter<V>(), Compass
 
     override fun post(id: String, rssi: Int, ssid: String) {
         view.showLoading()
-        currentLocation?.let {
-            dataManager.serverService
-                    .update(UpdateParam(id, ssid, rssi, it.latitude, it.longitude))
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .onErrorReturn { err ->
-                        err.printStackTrace()
-                        Response("", "", 0, "", "")
-                    }
-                    .subscribe { response ->
-                        Toast.makeText(view.getContext(), "SENT", Toast.LENGTH_SHORT).show()
-                        view.hideLoading()
-                        view.onReceiveDestination(response.lat.toDouble(), response.long.toDouble())
-                    }
+        currentLocation.let {
+            if (it == null) {
+                view.hideLoading()
+                view.showMessage("Current Location is null")
+            } else {
+                dataManager.serverService
+                        .update(UpdateParam(id, ssid, rssi, it.latitude, it.longitude))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.io())
+                        .subscribe(
+                                { response ->
+                                    Toast.makeText(view.getContext(), "SENT", Toast.LENGTH_SHORT).show()
+                                    view.hideLoading()
+                                    view.onReceiveDestination(response.lat?.toDouble() ?: 0.0, response.long?.toDouble() ?: 0.0)
+                                },
+                                { err ->
+                                    err.printStackTrace()
+                                    view.hideLoading()
+                                    view.showMessage(err.message ?: "NOPE!")
+                                }
+                        )
+            }
         }
     }
 

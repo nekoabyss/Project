@@ -1,6 +1,7 @@
 package co.project.client.ui.compass
 
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.support.v7.widget.AppCompatImageView
@@ -63,16 +64,44 @@ class CompassActivity : BaseActivity(), CompassMvp.View {
     @OnClick(R.id.refreshBtn)
     override fun onGetLocationClicked() {
         if (LocationHelper.instance.checkPermission(this)) {
-            LocationHelper.instance.getLocation(this)?.let {
-                presenter.currentLocation = it
-                client?.let {
-                    presenter.post(it.id, -69, "latte")
-                }
+            LocationHelper.instance.getLastKnownLocation(this).let {
+                if (it == null) {
+                    showLoading()
+                    LocationHelper.instance.requestLocationUpdate(this, object : LocationListener {
+                        override fun onLocationChanged(location: Location?) {
+                            hideLoading()
+                            location?.let {
+                                this@CompassActivity.gotLocation(it)
+                            }
+                        }
 
-                latText.text = "Latitude: ${it.latitude}"
-                longText.text = "Longitude: ${it.longitude}"
+                        override fun onStatusChanged(p0: String?, p1: Int, p2: Bundle?) {}
+                        override fun onProviderEnabled(p0: String?) {}
+                        override fun onProviderDisabled(p0: String?) {}
+
+                    })
+                } else {
+                    this.gotLocation(it)
+                }
             }
         }
+    }
+
+
+    private fun gotLocation(location: Location) {
+        presenter.currentLocation = location
+        client?.let {
+            presenter.post(it.id, -69, "latte")
+        }
+        latText.text = "Latitude: ${location.latitude}"
+        longText.text = "Longitude: ${location.longitude}"
+        val temp = Location(LocationManager.GPS_PROVIDER)
+        temp.latitude = 13.844053
+        temp.longitude = 100.448537
+        //bearingText.text = "Bearing: ${location.bearingTo(temp)}"
+        locationText.text = "Distance: ${location.distanceTo(temp)} meters"
+        //desLatText.text = "Destination Lat: ${temp.latitude}"
+        //desLongText.text = "Destination Long: ${temp.longitude}"
     }
 
     override fun onReceiveDestination(lat: Double, long: Double) {

@@ -1,13 +1,11 @@
 package co.project.client.ui.main
 
-import javax.inject.Inject
-
 import co.project.client.data.DataManager
-import co.project.client.data.model.Client
 import co.project.client.injection.ConfigPersistent
 import co.project.client.ui.base.BasePresenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 
 @ConfigPersistent
 class MainPresenter<V : MainMvp.View> @Inject
@@ -18,14 +16,18 @@ constructor(private val dataManager : DataManager) : BasePresenter<V>(), MainMvp
                 .connect()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .onErrorReturn { err ->
-                    err.printStackTrace()
-                    Client(err.message ?: err.toString())
-                }
-                .subscribe { client ->
-                    view.onConnected(client)
-                    view.hideLoading()
-                }
+                .subscribe(
+                        { client ->
+                            view.onConnected(client)
+                            view.hideLoading()
+                        },
+                        {
+                            err ->
+                            err.printStackTrace()
+                            view.hideLoading()
+                            view.showMessage(err.message ?: "Client Reached?")
+                        }
+                )
     }
 
     override fun resetServerConnection() {

@@ -1,12 +1,11 @@
 package co.project.client.ui.rssi
 
 import android.content.Context
+import android.net.wifi.ScanResult
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.Snackbar
-import android.support.v7.view.menu.MenuBuilder
 import android.support.v7.widget.AppCompatTextView
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -18,17 +17,19 @@ import butterknife.ButterKnife
 import butterknife.OnClick
 import co.project.client.R
 import co.project.client.ui.base.BaseActivity
+import timber.log.Timber
+import javax.inject.Inject
 
-class RssiActivity : BaseActivity(), RssiMvp.View {
+class RssiActivity : BaseActivity(), RssiMvp.View, RssiMvp.Interaction {
 
     @BindView(R.id.info) lateinit var infoTxt: AppCompatTextView
-    @BindView(R.id.include) lateinit var includeContent: AppCompatTextView
     @BindView(R.id.toolbar) lateinit var contentToolbar: Toolbar
-    @BindView(R.id.listItem) lateinit var netList: RecyclerView
-    @BindView(R.menu.menu_main) lateinit var menuMain: Menu
-    @BindView(R.id.action_setting) lateinit var actionSetting: MenuBuilder.ItemInvoker
+    @BindView(R.id.recycler_view) lateinit var recyclerView: RecyclerView
 
-    //@Inject lateinit var presenter: RssiPresenter<RssiMvp.View>
+//    @BindView(R.menu.menu_main) lateinit var menuMain: Menu
+//    @BindView(R.id.action_setting) lateinit var actionSetting: MenuBuilder.ItemInvoker
+
+    @Inject lateinit var presenter: RssiPresenter<RssiMvp.View>
 
     private var wifiManager: WifiManager? = null
 
@@ -37,57 +38,52 @@ class RssiActivity : BaseActivity(), RssiMvp.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.rssi_page)
-        //val toolbar = findViewById(R.id.toolbar) as Toolbar
-        setSupportActionBar(contentToolbar)
         setup()
     }
 
     override fun setup() {
-        //activityComponent.inject(this)
+        activityComponent.inject(this)
         unbinder = ButterKnife.bind(this)
-        //presenter.attachView(this)
+        presenter.attachView(this)
+
+        setSupportActionBar(contentToolbar)
+
+        this.wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
 
         adapter = RssiAdapter()
+        adapter?.delegate = this
+        recyclerView.adapter = adapter
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        scanNetwork()
     }
 
     override fun onDestroy() {
-        adapter = null
+        presenter.detachView()
+        adapter?.delegate = null
         super.onDestroy()
     }
 
-    private fun detectWiFi() {
-
-        this.wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    override fun scanNetwork() {
         this.wifiManager?.let {
             it.startScan()
             adapter?.setList(it.scanResults)
             adapter?.notifyDataSetChanged()
         }
+    }
 
-//        netList.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, i, l ->
-//            var c = 0
-//            var k: Int
-//            val name = nets[i]!!.getTitle()
-//            while (c < 10) {
-//                k = 0
-//                while (k < wifiList!!.size && name.compareTo(nets[k]!!.getTitle()) != 0) {
-//                    k++
-//                }
-//                list.add(nets[k]!!.getLevel())
-//
-//                Log.d("round", "roundc" + c + nets[k]!!.getTitle() + nets[k]!!.getLevel())
-//                c++
-//                SystemClock.sleep(2000)
-//                detectWiFi()
-//            }
-//
-//            for (z in list.indices) {
-//                Log.d("list", list[z] +"    "+ z)
-//            }
-//            list.clear()
-//        }
+    @OnClick(R.id.fab)
+    override fun onFabClicked(view: View) {
+        scanNetwork()
+        Snackbar
+                .make(view, "Scanning....", Snackbar.LENGTH_SHORT)
+                .show()
+    }
 
-
+    override fun onItemClicked(item: ScanResult) {
+        Timber.e(item.SSID)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -103,16 +99,6 @@ class RssiActivity : BaseActivity(), RssiMvp.View {
         val id = item.itemId
 
         return (id == R.id.action_setting) || super.onOptionsItemSelected(item)
-
-    }
-
-    @OnClick(R.id.fab)
-    fun onFabClicked(view: View) {
-        detectWiFi()
-        Snackbar
-                .make(view, "Scanning....", Snackbar.LENGTH_SHORT)
-                .setAction("Action", null)
-                .show()
     }
 
     private fun connectToWifi(networkSSID: String, networkPassword: String) {

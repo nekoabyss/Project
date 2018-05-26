@@ -8,6 +8,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -53,22 +54,41 @@ class LocationHelper {
                     setPositiveButton(context.getString(android.R.string.ok)) { _, _ -> }
                     show()
                 }
-            } else {
-                ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LocationHelper.PERMISSION_REQUEST_CODE)
             }
+            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LocationHelper.PERMISSION_REQUEST_CODE)
             false
         } else {
             true
         }
     }
 
-    fun getLocation(context: Context): Location? {
-        return getActivity(context)?.let { getLocation(it) }
+    fun requestLocationUpdate(activity: Activity, listener: LocationListener) {
+        if (checkPermission(activity)) {
+            getLocationManager(activity)?.let {
+                it.requestSingleUpdate(LocationManager.GPS_PROVIDER, listener, null)
+            }
+        }
     }
 
-    fun getLocation(activity: Activity): Location? {
+    fun getLastKnownLocation(context: Context): Location? {
+        return getActivity(context)?.let { getLastKnownLocation(it) }
+    }
+
+    fun getLastKnownLocation(activity: Activity): Location? {
         return if (checkPermission(activity)) {
-            getLocationManager(activity)?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            getLocationManager(activity)?.let {
+                val providers = it.getProviders(true)
+                return providers
+                        .map { provider -> it.getLastKnownLocation(provider) }
+                        .reduce { currentBetterLocation, location ->
+                            Timber.e(if (location == null) "null?" else "ok")
+                            return if (currentBetterLocation == null || location.accuracy < currentBetterLocation.accuracy) {
+                                location
+                            } else {
+                                currentBetterLocation
+                            }
+                        }
+            }
         } else {
             null
         }

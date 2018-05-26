@@ -5,6 +5,7 @@ import co.project.client.injection.PerActivity
 import co.project.client.injection.module.ActivityModule
 import co.project.client.ui.compass.CompassActivity
 import co.project.client.ui.main.MainActivity
+import co.project.client.ui.rssi.RssiActivity
 
 /**
  * This component inject dependencies to all Activities across the application
@@ -14,4 +15,5 @@ import co.project.client.ui.main.MainActivity
 interface ActivityComponent {
     fun inject(activity: MainActivity)
     fun inject(activity: CompassActivity)
+    fun inject(activity: RssiActivity)
 }

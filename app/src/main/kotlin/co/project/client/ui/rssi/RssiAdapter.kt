@@ -7,23 +7,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import co.project.client.R
-import co.project.client.data.model.Element
 
 class RssiAdapter: RecyclerView.Adapter<RssiAdapter.RssiViewHolder>() {
 
-    private var wifiList: List<Element>? = null
+    private var wifiList: List<ScanResult>? = null
+    var delegate: RssiMvp.Interaction? = null
 
     override fun onBindViewHolder(holder: RssiViewHolder, pos: Int) {
-        holder.setItem(wifiList?.get(pos))
+        wifiList?.get(pos)?.let { item ->
+            holder.apply {
+                setItem(item)
+                itemView.setOnClickListener { delegate?.onItemClicked(item) }
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RssiViewHolder {
         val view = LayoutInflater
                 .from(parent.context)
                 .inflate(R.layout.items, parent, false)
-        view.setOnClickListener {
-            
-        }
         return RssiViewHolder(view)
     }
 
@@ -32,34 +34,19 @@ class RssiAdapter: RecyclerView.Adapter<RssiAdapter.RssiViewHolder>() {
     }
 
     fun setList(list: List<ScanResult>?) {
-        wifiList = list?.map { item ->
-            item
-                    .toString()
-                    .split(",")
-                    .dropLastWhile { it.isEmpty() }
-                    .mapIndexed { index, str ->
-                        when (index) {
-                            0, 2, 3 -> str.split(":").dropLastWhile { it.isEmpty() }[1]
-                            else -> null
-                        }
-                    }
-                    .filterNotNull()
-                    .let {
-                        Element(it[0], it[1], it[2])
-                    }
-        }
+        wifiList = list
     }
 
     class RssiViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
-        private var ssidTxt: AppCompatTextView? = itemView?.findViewById(R.id.tvSSID)
-        private var securityTxt: AppCompatTextView? = itemView?.findViewById(R.id.tvSecurity)
-        private var strengthTxt: AppCompatTextView? = itemView?.findViewById(R.id.tvLevel)
+        private var ssidTxt: AppCompatTextView? = itemView?.findViewById(R.id.ssid_lbl)
+        private var securityTxt: AppCompatTextView? = itemView?.findViewById(R.id.security_lbl)
+        private var strengthTxt: AppCompatTextView? = itemView?.findViewById(R.id.signal_lbl)
 
-        internal fun setItem(element: Element?) {
-            element.let {
-                ssidTxt?.text = element?.title
-                securityTxt?.text = element?.security
-                strengthTxt?.text = "Signal Level: ${element?.level ?: "--"}"
+        internal fun setItem(network: ScanResult?) {
+            network.let {
+                ssidTxt?.text = "SSID: ${network?.SSID ?: "HIDDEN"}"
+                securityTxt?.text = "Security: ${network?.capabilities}"
+                strengthTxt?.text = "Signal Level: ${network?.level}"
             }
         }
     }
